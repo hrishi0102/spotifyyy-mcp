@@ -3,7 +3,6 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import fetch from "node-fetch";
 
-// Create MCP server
 const server = new McpServer({
   name: "SpotifyServer",
   version: "1.0.0",
@@ -12,7 +11,6 @@ const server = new McpServer({
   },
 });
 
-// Auth storage - no automatic loading
 let spotifyAuthInfo = {
   accessToken: "",
   refreshToken: "",

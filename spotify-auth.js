@@ -20,7 +20,6 @@ app.get("/callback", async (req, res) => {
   const code = req.query.code;
 
   try {
-    // Exchange code for tokens
     const tokenResponse = await axios({
       method: "post",
       url: "https://accounts.spotify.com/api/token",
@@ -37,7 +36,7 @@ app.get("/callback", async (req, res) => {
       },
     });
 
-    // Save tokens to file
+    // Save tokens to secrets.json file
     const tokens = {
       clientId: CLIENT_ID,
       clientSecret: CLIENT_SECRET,
@@ -49,7 +48,6 @@ app.get("/callback", async (req, res) => {
 
     res.send("Authentication successful! Tokens saved to secrets.json");
 
-    // Close the server after authentication
     setTimeout(() => {
       server.close();
       console.log(
