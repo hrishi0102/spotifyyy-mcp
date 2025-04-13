@@ -1,0 +1,41 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required: []
+    properties:
+      clientId:
+        type: string
+        description: Spotify Client ID
+      clientSecret:
+        type: string
+        description: Spotify Client Secret
+      accessToken:
+        type: string
+        description: Spotify Access Token
+      refreshToken:
+        type: string
+        description: Spotify Refresh Token
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |-
+    (config) => {
+      const env = {};
+      if (config.clientId) { env.SPOTIFY_CLIENT_ID = config.clientId; }
+      if (config.clientSecret) { env.SPOTIFY_CLIENT_SECRET = config.clientSecret; }
+      if (config.accessToken) { env.SPOTIFY_ACCESS_TOKEN = config.accessToken; }
+      if (config.refreshToken) { env.SPOTIFY_REFRESH_TOKEN = config.refreshToken; }
+      return {
+        command: "node",
+        args: ["build/spotify-mcp-server.js"],
+        env: env
+      };
+    }
+  exampleConfig:
+    clientId: your-spotify-client-id
+    clientSecret: your-spotify-client-secret
+    accessToken: your-initial-access-token
+    refreshToken: your-initial-refresh-token
