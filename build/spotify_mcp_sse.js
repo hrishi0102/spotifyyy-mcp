@@ -1,7 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { z } from "zod";
 import fetch from "node-fetch";
+import express from "express";
+import cors from "cors";
+const app = express();
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+}));
 const server = new McpServer({
     name: "SpotifyServer",
     version: "1.0.0",
@@ -9,6 +17,7 @@ const server = new McpServer({
         tools: {},
     },
 });
+const transports = {};
 let spotifyAuthInfo = {
     accessToken: "",
     refreshToken: "",
@@ -423,14 +432,19 @@ server.tool("get-recommendations", {
         };
     }
 });
-// Start the server
-async function main() {
-    const transport = new StdioServerTransport();
-    await server.connect(transport);
-    console.error("Spotify MCP Server running on stdio");
-    console.error("No credentials are pre-loaded. Users must set credentials with set-spotify-credentials tool.");
-}
-main().catch((error) => {
-    console.error("Fatal error:", error);
-    process.exit(1);
+let transport = null;
+app.get("/sse", (req, res) => {
+    transport = new SSEServerTransport("/messages", res);
+    server.connect(transport);
+});
+app.post("/messages", (req, res) => {
+    if (transport) {
+        transport.handlePostMessage(req, res);
+    }
+    else {
+        res.status(503).send("No active transport");
+    }
+});
+app.listen(3001, () => {
+    console.log("Listening on port 3001");
 });
